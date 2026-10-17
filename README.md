@@ -1,6 +1,6 @@
 # omnifood/zenchef
 
-Zenchef for [glitchr/omnifood](https://github.com/glitchr-studio/omnifood) - its place, not yet its
+Zenchef for [omniscient/omnifood](https://github.com/glitchr-studio/omnifood) - its place, not yet its
 calls: **Zenchef's partner API is documented on request only.** Its help centre
 (https://help.zenchef.com/hc/en-gb/articles/27690768125597-Zenchef-API, read on 2026-10-04) lists what
 it offers - reservations read, created, updated and their status changed; availability and opening
