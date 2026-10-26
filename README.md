@@ -1,6 +1,6 @@
 # omnifood/zenchef
 
-Zenchef for [omniscient/omnifood](https://github.com/glitchr-studio/omnifood) - its place, not yet its
+Zenchef for [omnisense/omnifood](https://github.com/glitchr-omnisense/omnifood) - its place, not yet its
 calls: **Zenchef's partner API is documented on request only.** Its help centre
 (https://help.zenchef.com/hc/en-gb/articles/27690768125597-Zenchef-API, read on 2026-10-04) lists what
 it offers - reservations read, created, updated and their status changed; availability and opening
@@ -24,7 +24,7 @@ $zenchef = (new ZenchefPlatformFactory(HttpClient::create()))->create([
 
 Plain PHP, no framework needed: the factory takes any `HttpClientInterface` - the application's, a
 `MockHttpClient` in a test - and makes its own when given none. In a Symfony application, the same
-options under `omnifood.platforms` ([the bundle](https://github.com/glitchr-studio/omnifood/blob/1.x/docs/symfony.md)):
+options under `omnifood.platforms` ([the bundle](https://github.com/glitchr-omnisense/omnifood/blob/1.x/docs/symfony.md)):
 
 ```yaml
 omnifood:
