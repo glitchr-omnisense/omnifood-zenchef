@@ -81,6 +81,14 @@ final class ZenchefPlatformTest extends TestCase
         $this->platform()->api()->request('GET', '/anything');
     }
 
+    /** A 2xx whose body is not JSON (a proxy's page) is not an empty answer. */
+    public function testAnAnswerThatIsNotJsonIsAnError(): void
+    {
+        $this->expectException(ProviderException::class);
+        $this->expectExceptionMessage('[zenchef] An answer that is not JSON (HTTP 200).');
+        (new \Omnifood\Zenchef\ZenchefPlatformFactory(new MockHttpClient(new MockResponse('<html><body>502 Bad Gateway</body></html>', ['http_code' => 200, 'response_headers' => ['Content-Type: text/html']]))))->create(['token' => 'zc-token', 'restaurant_id' => '12345', 'base_uri' => 'https://zenchef.example', 'headers' => ['X-Token' => '{token}']])->api()->request('GET', '/x');
+    }
+
     public function testErrorsAreMapped(): void
     {
         try {

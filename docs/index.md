@@ -114,6 +114,8 @@ In a Symfony application, `PlatformInterface $zenchef` injects the platform; `->
   the message from `message` or `error` (the error's shape is not public), else `HTTP <status>.`;
   no provider code.
 - A network failure: `ProviderException` `Zenchef could not be reached: ...`.
+- A 2xx answer whose body is not JSON (a proxy's or a maintenance page): `ProviderException`
+  `An answer that is not JSON (HTTP 200).`, with the status.
 - Every reservation call and `notify()`: `NotSupportedException`.
 
 ## Verified, and not
