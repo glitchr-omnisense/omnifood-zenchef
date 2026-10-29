@@ -118,6 +118,12 @@ In a Symfony application, `PlatformInterface $zenchef` injects the platform; `->
   `An answer that is not JSON (HTTP 200).`, with the status.
 - Every reservation call and `notify()`: `NotSupportedException`.
 
+No failure carries the token: a network failure's message has it masked as `***` (the key
+parameters of a URL too), its previous is a copy of the HTTP client's exception (the same class and
+code), and no trace of the chain keeps its arguments, where the request's options stood ([No secret
+in a
+failure](https://github.com/glitchr-omnisense/omnifood/blob/1.x/docs/errors.md#no-secret-in-a-failure)).
+
 ## Verified, and not
 
 `Tests/ZenchefPlatformTest.php` checks that every reservation call is refused rather than

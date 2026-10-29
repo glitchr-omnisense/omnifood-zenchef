@@ -5,6 +5,7 @@ namespace Omnifood\Zenchef;
 use Omnifood\Exception\InvalidConfigException;
 use Omnifood\Exception\ProviderException;
 use Omnifood\Exception\UnauthorizedException;
+use Omnifood\Http\Redaction;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -46,7 +47,7 @@ final class Api
     public function request(string $method, string $path, array $query = [], array|object|null $json = null): array
     {
         if (!$this->baseUri || !$this->headers) {
-            throw new InvalidConfigException('The "zenchef" platform needs: base_uri, headers (from the documentation Zenchef sends on request).');
+            throw Redaction::withoutArguments(new InvalidConfigException('The "zenchef" platform needs: base_uri, headers (from the documentation Zenchef sends on request).'));
         }
         $headers = ['Accept' => 'application/json'];
         foreach ($this->headers as $name => $value) {
@@ -62,24 +63,27 @@ final class Api
         if (null !== $json) {
             $options['json'] = $json;
         }
+        $url = rtrim($this->baseUri, '/').'/'.ltrim(strtr($path, ['{restaurant_id}' => rawurlencode((string) $this->restaurantId)]), '/');
         try {
-            $response = $this->http->request($method, rtrim($this->baseUri, '/').'/'.ltrim(strtr($path, ['{restaurant_id}' => rawurlencode((string) $this->restaurantId)]), '/'), $options);
+            $response = $this->http->request($method, $url, $options);
             $status = $response->getStatusCode();
             $content = $response->getContent(false);
         } catch (HttpExceptionInterface $e) {
-            throw new ProviderException(self::PLATFORM, 'Zenchef could not be reached: '.$e->getMessage(), null, null, $e);
+            $secrets = [...Redaction::secrets($url, $options), ...array_filter([$this->token])];
+
+            throw Redaction::withoutArguments(new ProviderException(self::PLATFORM, 'Zenchef could not be reached: '.Redaction::text($e->getMessage(), $secrets), null, null, Redaction::copy($e, $secrets)));
         }
         $data = '' === $content ? [] : json_decode($content, true);
         if ($status < 400 && null === $data && \JSON_ERROR_NONE !== json_last_error()) {
             // A proxy's or a maintenance page: not an empty answer.
-            throw new ProviderException(self::PLATFORM, \sprintf('An answer that is not JSON (HTTP %d).', $status), $status);
+            throw Redaction::withoutArguments(new ProviderException(self::PLATFORM, \sprintf('An answer that is not JSON (HTTP %d).', $status), $status));
         }
         $data = \is_array($data) ? $data : [];
         if ($status >= 400) {
             // The error's shape is not public: its message where there is one, the status otherwise.
             $message = \is_string($data['message'] ?? null) ? $data['message'] : (\is_string($data['error'] ?? null) ? $data['error'] : \sprintf('HTTP %d.', $status));
 
-            throw 401 === $status || 403 === $status ? new UnauthorizedException(self::PLATFORM, $message, $status) : new ProviderException(self::PLATFORM, $message, $status);
+            throw Redaction::withoutArguments(401 === $status || 403 === $status ? new UnauthorizedException(self::PLATFORM, $message, $status) : new ProviderException(self::PLATFORM, $message, $status));
         }
 
         return $data;
