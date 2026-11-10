@@ -108,6 +108,14 @@ omnifood:
 In a Symfony application, `PlatformInterface $zenchef` injects the platform; `->api()` is on
 `ZenchefPlatform`, not on an interface.
 
+## Usage policy
+
+`policy.json` (named in `composer.json`'s `extra.omnisense.policy`, read 2026-11-10) declares
+the access contract-only (the documentation comes from Zenchef on request) and its published
+rule: 100 calls a minute for the calls answered in less than a second, the slower ones one after
+the other (`concurrency` 1). A 429 is a `RateLimitedException`, never retried, and Zenchef's next
+calls wait for its `Retry-After`, unsent; no call is retried, the HTTP client's included. See omnisense/omnifood's [Usage policies and rate limits](https://github.com/glitchr-omnisense/omnifood/blob/1.x/docs/policies.md).
+
 ## Errors
 
 - 401 and 403: `UnauthorizedException`; any other status of 400 or more: `ProviderException`,

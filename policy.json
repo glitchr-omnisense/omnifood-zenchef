@@ -1,0 +1,45 @@
+{
+    "$schema": "https://github.com/glitchr-omnisense/contracts/blob/1.x/resources/usage-policy.schema.json",
+    "provider": "zenchef",
+    "rateLimits": [
+        {
+            "max": 100,
+            "window": "minute",
+            "scope": "key",
+            "note": "For the calls Zenchef answers in less than a second; the slower ones one after the other (concurrency 1)."
+        }
+    ],
+    "concurrency": 1,
+    "rights": {
+        "commercial": "contract",
+        "openSourceRequired": false,
+        "caching": {
+            "permission": "contract",
+            "maxTtl": null
+        },
+        "storage": "contract",
+        "redistribution": "contract",
+        "attribution": {
+            "required": false,
+            "text": null,
+            "url": null,
+            "where": []
+        },
+        "licence": null
+    },
+    "requirements": {
+        "key": true,
+        "userAgent": {
+            "required": false,
+            "pattern": null
+        }
+    },
+    "provenance": {
+        "terms": null,
+        "policy": "https://help.zenchef.com/hc/en-gb/articles/27690768125597-Zenchef-API",
+        "contact": "api-tech-help@zenchef.com",
+        "notes": "Contract-only: the API documentation, base URL and headers come from Zenchef on request (api-tech-help@zenchef.com), an official partnership through zenchef.com/integrations; every call is monitored and Zenchef may shut an integration down. The help article answered 403 to a scripted read on 2026-11-10: its figures were read through a search engine's copy of it that day. The site's General Terms of Use (2024-02-19) do not cover the API. Rights not published: contract.",
+        "verifiedAt": "2026-11-10",
+        "declaredBy": "maintainer"
+    }
+}

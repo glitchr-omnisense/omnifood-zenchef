@@ -5,7 +5,10 @@ namespace Omnifood\Zenchef;
 use Omnifood\Exception\InvalidConfigException;
 use Omnifood\Exception\ProviderException;
 use Omnifood\Exception\UnauthorizedException;
+use Omnifood\Http\NoRetry;
 use Omnifood\Http\Redaction;
+use Omnifood\Http\Throttle;
+use Omnisense\Contracts\Policy\Backoff;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -34,8 +37,11 @@ final class Api
         private readonly ?string $baseUri = null,
         private readonly array $headers = [],
         ?HttpClientInterface $http = null,
+        /** The waits Zenchef asks for (omnisense/contracts' Backoff): no call while one lasts, a 429 a RateLimitedException, never retried */
+        private readonly ?Backoff $backoff = null,
     ) {
-        $this->http = $http ?? HttpClient::create();
+        // Sent once: no retry of the HTTP client's either (Http\NoRetry).
+        $this->http = NoRetry::of($http ?? HttpClient::create());
     }
 
     /**
@@ -64,9 +70,11 @@ final class Api
             $options['json'] = $json;
         }
         $url = rtrim($this->baseUri, '/').'/'.ltrim(strtr($path, ['{restaurant_id}' => rawurlencode((string) $this->restaurantId)]), '/');
+        Throttle::before($this->backoff);
         try {
             $response = $this->http->request($method, $url, $options);
             $status = $response->getStatusCode();
+            $received = $response->getHeaders(false);
             $content = $response->getContent(false);
         } catch (HttpExceptionInterface $e) {
             $secrets = [...Redaction::secrets($url, $options), ...array_filter([$this->token])];
@@ -83,8 +91,11 @@ final class Api
             // The error's shape is not public: its message where there is one, the status otherwise.
             $message = \is_string($data['message'] ?? null) ? $data['message'] : (\is_string($data['error'] ?? null) ? $data['error'] : \sprintf('HTTP %d.', $status));
 
+            Throttle::after($this->backoff, self::PLATFORM, $status, $received, 'Too many calls, try again later: '.$message);
+
             throw Redaction::withoutArguments(401 === $status || 403 === $status ? new UnauthorizedException(self::PLATFORM, $message, $status) : new ProviderException(self::PLATFORM, $message, $status));
         }
+        Throttle::after($this->backoff, self::PLATFORM, $status, $received);
 
         return $data;
     }

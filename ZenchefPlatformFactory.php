@@ -38,6 +38,7 @@ final class ZenchefPlatformFactory extends PlatformFactory
             $config['base_uri'] ? (string) $config['base_uri'] : null,
             array_map('strval', (array) $config['headers']),
             $this->http,
+            $config->backoff(),
         ));
     }
 }

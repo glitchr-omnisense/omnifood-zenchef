@@ -10,6 +10,8 @@ use Omnifood\Model\Reservation;
 use Omnifood\Model\ReservationStatus;
 use Omnifood\NotifiableInterface;
 use Omnifood\ReservationsInterface;
+use Omnisense\Contracts\Policy\DeclaresUsagePolicyInterface;
+use Omnisense\Contracts\Policy\UsagePolicy;
 
 /**
  * A restaurant's reservations at Zenchef - not yet: Zenchef's partner API
@@ -21,12 +23,20 @@ use Omnifood\ReservationsInterface;
  * refused (NotSupportedException) rather than guessed; api() is the
  * client to write them with once the documentation is in hand.
  */
-final class ZenchefPlatform implements ReservationsInterface, NotifiableInterface
+final class ZenchefPlatform implements ReservationsInterface, NotifiableInterface, DeclaresUsagePolicyInterface
 {
+    private static ?UsagePolicy $policy = null;
+
     public const DOCUMENTATION = 'https://help.zenchef.com/hc/en-gb/articles/27690768125597-Zenchef-API';
 
     public function __construct(private readonly Api $api)
     {
+    }
+
+    /** Its usage policy, as the package declares it (policy.json, read once). */
+    public function usagePolicy(): UsagePolicy
+    {
+        return self::$policy ??= UsagePolicy::fromFile(__DIR__.'/policy.json');
     }
 
     public function getName(): string
