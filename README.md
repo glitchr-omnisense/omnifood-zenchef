@@ -38,6 +38,18 @@ omnifood:
                 headers: {}                                             # from it too: {"<header>": "{token}", "<header>": "{restaurant_id}"}
 ```
 
+## Install
+
+```sh
+composer require omnifood/zenchef
+```
+
+It requires `omnisense/omnifood` `^1.0`, installed with it. A real call needs: **a Zenchef partner
+token** (Settings > Partners) and the documentation Zenchef sends on request. With no account, its
+tests run on recorded answers (a `MockHttpClient`), and
+[omnisense/omnifood](https://github.com/glitchr-omnisense/omnifood#install-and-a-first-call)'s
+README has a first call that runs without one.
+
 ## What it does
 
 - Holds the restaurant's credentials and a client, `api()`, that sends the configured headers
